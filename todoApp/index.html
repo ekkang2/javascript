@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TodoList</title>
+    <style>
+
+        #wrapper {
+            width: 100%;
+            height: auto;
+        }
+
+        header {
+            width: 100%;
+            height: auto;
+        }
+
+        header > div {
+            width: 100%;
+            height: 70px;
+            background-color: gray;
+            margin-top: 50px;
+            position: relative;
+        }
+
+        .top {
+            color: white;
+            font-size: 25px;
+            position: absolute;
+            left: 15px;
+            top: 20px;
+        }
+
+        main {
+            width: 100%;
+            height: auto;
+        }
+
+        main > div:nth-child(1) {
+            margin-left: 10px;
+            margin-top: 25px;
+        }
+
+        .input_form {
+            margin-top: 20px;
+        }
+
+        .input_box {
+            display: flex;
+            align-items: center;
+        }
+
+        
+        .input_box_input {
+            border-radius: 5px 0 0 5px; 
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-right: none; 
+        }
+
+        .add_button {
+            border-radius: 0 5px 5px 0; 
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            background-color: #555; 
+            color: white;
+            cursor: pointer;
+            height: 38px;
+        }
+
+        .add_button:hover {
+            background-color: #333; 
+        }
+
+        input::placeholder{
+            text-indent: 6px;
+        } /* 텍스트 들여쓰기 */
+
+        input:focus{outline: none;}
+
+        #todoListContainer {
+            margin-top: 20px;
+            padding: 0; /* 기본 padding 제거 */
+        }
+
+        .todo_item {
+            display: flex;
+            align-items: center;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc; /* 테두리 추가 */
+            border-radius: 0; /* 기본 모서리 둥글게 하지 않음 */
+            padding: 0 10px;
+            margin: 0; /* 항목 사이의 간격 제거 */
+            position: relative; /* 버튼을 항목의 오른쪽 끝에 배치하기 위해 필요 */
+        }
+
+        .todo_item:first-child {
+            border-radius: 5px 5px 0 0; /* 첫 번째 항목의 상단 모서리 둥글게 */
+            border-top: 1px solid #ccc; /* 상단 테두리 유지 */
+        }
+
+        .todo_item:last-child {
+            border-radius: 0 0 5px 5px; /* 마지막 항목의 하단 모서리 둥글게 */
+            border-bottom: 1px solid #ccc; /* 하단 테두리 유지 */
+        }
+
+        .todo_item:not(:last-child) {
+            border-bottom: none; /* 중간 항목 사이의 테두리 제거 */
+        }
+
+        .todo_text {
+            flex-grow: 1;
+            height: 40px;
+            line-height: 40px;
+            background-color: transparent;
+            border: none; /* 경계선 제거 */
+        }
+
+        .remove_button {
+            width: 40px;
+            height: 40px;
+            border: none; 
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 5px 5px 0; /* 버튼의 오른쪽 모서리 둥글게 */
+            font-size: 16px; /* X의 크기 조절 */
+            background-color: white;
+            position: absolute; /* 버튼을 항목의 오른쪽 끝에 배치 */
+            right: 0; /* 오른쪽에서 붙어 보이도록 배치 */
+            top: 50%; /* 수직 중앙 정렬 */
+            transform: translateY(-50%); /* 수직 중앙 정렬 보정 */
+        }
+
+    </style>
+    
+    <script>
+
+    window.onload = function() {
+        const todoInput = document.getElementById('todoInput');
+        const todoListContainer = document.getElementById('todoListContainer');
+
+        // 저장된 목록을 로컬 스토리지에서 불러오기
+        const savedTodos = JSON.parse(localStorage.getItem('todos')) || [];
+
+        // 저장된 목록을 화면에 표시하기
+        savedTodos.forEach(todoText => {
+            addTodoItem(todoText);
+        });
+
+        document.getElementById('todoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const todoText = todoInput.value.trim();
+
+            if (todoText !== "") {
+                addTodoItem(todoText);
+                todoInput.value = ""; // 입력란 비우기
+
+                // 새로운 항목을 로컬 스토리지에 저장하기
+                savedTodos.push(todoText);
+                localStorage.setItem('todos', JSON.stringify(savedTodos));
+            }
+        });
+
+        function addTodoItem(text) {
+            // 새 할일 항목 담을 div 생성
+            const todoItem = document.createElement('div');
+            todoItem.classList.add('todo_item');
+
+            // 할 일 텍스트를 담은 span 생성
+            const todoTextSpan = document.createElement('span');
+            todoTextSpan.classList.add('todo_text');
+            todoTextSpan.textContent = text;
+
+            // 삭제 버튼 생성
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('remove_button');
+            removeButton.textContent = 'X';
+
+            // 삭제 버튼 클릭 이벤트
+            removeButton.addEventListener('click', function() {
+                todoListContainer.removeChild(todoItem);
+
+                // 로컬 스토리지에서 항목 제거
+                const index = savedTodos.indexOf(text);
+                if (index > -1) {
+                    savedTodos.splice(index, 1);
+                    localStorage.setItem('todos', JSON.stringify(savedTodos));
+                }
+            });
+
+            // 항목을 container에 추가
+            todoItem.appendChild(todoTextSpan);
+            todoItem.appendChild(removeButton);
+            todoListContainer.appendChild(todoItem);
+        }
+    }
+    </script>
+</head>
+<body>
+        <div id="wrapper">
+            <header>
+                <div>
+                    <span class="top">ToDo List</span>
+                </div>
+            </header>
+
+            <main>
+                <div>
+                    오늘 할일을 작성해 보세요.
+                </div>
+                <div class="input_form">
+                    <form action="#" method="get" class="input_box" id="todoForm">
+                        <input type="text" id="todoInput" class="input_box_input" placeholder="할일을 입력하세요.">
+                        <input type="submit" class="add_button" value="추가">
+                    </form>
+                </div>
+                <div id="todoListContainer"></div>
+            </main>
+        </div>
+</body>
+</html>
